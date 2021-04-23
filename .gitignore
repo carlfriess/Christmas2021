@@ -9,3 +9,7 @@ Assembly\ Exports/
 *.rawProject\ Outputs*/
 # Altium metadata file
 *.PcbDoc.htm
+
+# IntelliJ
+.idea/
+*.iml

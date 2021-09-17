@@ -8,7 +8,7 @@
         #canvas {
             display: block;
             margin: auto;
-            background-color: lightgray;
+            border: solid 1px lightgray;
         }
     </style>
 </head>
@@ -46,45 +46,66 @@
         };
     }
 
-    function drawLED(ctx, point) {
+    function drawLED(ctx, point, index) {
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 0.5, 0, 2 * Math.PI);
+        ctx.arc(point.x, point.y, 1, 0, 2 * Math.PI);
         ctx.stroke();
+        ctx.fillText(`D${index}`, point.x + 1.5, point.y);
         // ctx.fillText(`(${ point.x.toFixed(1) }, ${ (100 - point.y).toFixed(1) })`, point.x + 1, point.y);
     }
 
     const center = {x: 50, y: 50};
 
-    for (let radius = 9; radius <= 50; radius += 9) {
+
+
+    function draw() {
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const indexOrder = [
+            27, 23, 10, 5, 46, 37,
+            28, 24, 11, 4, 47, 38,
+            30, 25, 12, 3, 48, 39,
+            33, 13, 17, 2, 51, 42,
+            34, 14, 18, 1, 52, 43,
+            35, 31, 20, 26, 19, 15, 8, 6, 53, 49, 44, 40,
+            36, 32, 21, 29, 22, 16, 9, 7, 54, 50, 45, 41,
+        ];
+
+        for (let radius = 9; radius <= 50; radius += 9) {
+            for (let i = 0; i < 6; i++) {
+                const angle = 2 * i * Math.PI / 6;
+                const point = pointOnCircle(center, radius, angle);
+                drawLED(ctx, point, indexOrder.shift());
+            }
+        }
+
+        const radius1 = 35;
+        const radius2 = 42;
+
         for (let i = 0; i < 6; i++) {
             const angle = 2 * i * Math.PI / 6;
-            const point = pointOnCircle(center, radius, angle);
-            drawLED(ctx, point);
+            const point1 = pointOnCircle(center, radius1, angle - 0.2);
+            const point2 = pointOnCircle(center, radius1, angle + 0.2);
+            drawLED(ctx, point1, indexOrder.shift());
+            drawLED(ctx, point2, indexOrder.shift());
+            // const point3 = pointOnCircle(center, radius2, angle - 0.35);
+            // const point4 = pointOnCircle(center, radius2, angle + 0.35);
+            // ctx.fillText(`(${ radToDeg(anglePoints(point1, point3)).toFixed(1) })`, point3.x + 1, point3.y);
+            // ctx.fillText(`(${ radToDeg(anglePoints(point2, point4)).toFixed(1) })`, point4.x + 1, point4.y);
         }
+
+        for (let i = 0; i < 6; i++) {
+            const angle = 2 * i * Math.PI / 6;
+            const point1 = pointOnCircle(center, radius2, angle - 0.35);
+            const point2 = pointOnCircle(center, radius2, angle + 0.35);
+            drawLED(ctx, point1, indexOrder.shift());
+            drawLED(ctx, point2, indexOrder.shift());
+        }
+
     }
 
-    const radius1 = 35;
-    const radius2 = 42;
-
-    for (let i = 0; i < 6; i++) {
-        const angle = 2 * i * Math.PI / 6;
-        const point1 = pointOnCircle(center, radius1, angle - 0.2);
-        const point2 = pointOnCircle(center, radius1, angle + 0.2);
-        drawLED(ctx, point1);
-        drawLED(ctx, point2);
-        // const point3 = pointOnCircle(center, radius2, angle - 0.35);
-        // const point4 = pointOnCircle(center, radius2, angle + 0.35);
-        // ctx.fillText(`(${ radToDeg(anglePoints(point1, point3)).toFixed(1) })`, point3.x + 1, point3.y);
-        // ctx.fillText(`(${ radToDeg(anglePoints(point2, point4)).toFixed(1) })`, point4.x + 1, point4.y);
-    }
-
-    for (let i = 0; i < 6; i++) {
-        const angle = 2 * i * Math.PI / 6;
-        const point1 = pointOnCircle(center, radius2, angle - 0.35);
-        const point2 = pointOnCircle(center, radius2, angle + 0.35);
-        drawLED(ctx, point1);
-        drawLED(ctx, point2);
-    }
+    draw();
 
 </script>
 

@@ -18,6 +18,25 @@
 
 <script type="application/javascript">
 
+    class Frame {
+
+        constructor() {
+            this._leds = [];
+            for (let i = 0; i < 54; i++) {
+                this._leds.push(false);
+            }
+        }
+
+        toggle(index) {
+            this._leds[index - 1] = !this._leds[index - 1]
+        }
+
+        isOn(index) {
+            return this._leds[index - 1];
+        }
+
+    }
+
     const canvas = document.querySelector("#canvas");
     const ctx = canvas.getContext("2d");
     canvas.width = 800;
@@ -28,6 +47,9 @@
     ctx.lineWidth = 0.1;
     ctx.font = "2px Arial";
     ctx.fillStyle = "gray";
+
+    const ledPositions = {};
+    let currentFrame = new Frame();
 
     function radToDeg(a) {
         return a / Math.PI * 180;
@@ -47,16 +69,36 @@
     }
 
     function drawLED(ctx, point, index) {
+
+        // Draw the LED
         ctx.beginPath();
         ctx.arc(point.x, point.y, 1, 0, 2 * Math.PI);
         ctx.stroke();
+        if (currentFrame.isOn(index)) {
+            ctx.fill();
+        }
         ctx.fillText(`D${index}`, point.x + 1.5, point.y);
         // ctx.fillText(`(${ point.x.toFixed(1) }, ${ (100 - point.y).toFixed(1) })`, point.x + 1, point.y);
+
+        // Add the LED to the point map
+        ledPositions[index] = point;
+    }
+
+    function getMouse(e) {
+        let element = canvas, offsetX = 0, offsetY = 0;
+
+        // Compute the total offset
+        if (element.offsetParent !== undefined) {
+            do {
+                offsetX += element.offsetLeft;
+                offsetY += element.offsetTop;
+            } while ((element = element.offsetParent));
+        }
+
+         return {x: (e.pageX - offsetX) / 4, y: (e.pageY - offsetY) / 4};
     }
 
     const center = {x: 50, y: 50};
-
-
 
     function draw() {
 
@@ -104,6 +146,26 @@
         }
 
     }
+
+    // Fixes a problem where double clicking causes text to get selected on the canvas
+    canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
+
+    canvas.addEventListener('mouseup', function(e) {
+
+        // Get mouse position
+        let mouse = getMouse(e);
+
+        // Toggle all LEDs within range of the mouse
+        for (const [index, point] of Object.entries(ledPositions)) {
+            if (Math.pow(point.x - mouse.x, 2) + Math.pow(point.y - mouse.y, 2) < 16) {
+                currentFrame.toggle(index);
+            }
+        }
+
+        // Redraw the canvas
+        draw();
+
+    }, true);
 
     draw();
 

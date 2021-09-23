@@ -18,6 +18,27 @@
 
 <script type="application/javascript">
 
+    class Point {
+
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        add(other) {
+            return new Point(this.x + other.x, this.y + other.y);
+        }
+
+        sub(other) {
+            return new Point(this.x - other.x, this.y - other.y);
+        }
+
+        distSquared(other) {
+            return Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2);
+        }
+
+    }
+
     class Frame {
 
         constructor() {
@@ -62,10 +83,7 @@
     function pointOnCircle(center, radius, angle) {
         const dx = Math.sin(angle) * radius;
         const dy = Math.cos(angle) * radius;
-        return {
-            x: center.x + dx,
-            y: center.y + dy,
-        };
+        return center.add(new Point(dx, dy));
     }
 
     function drawLED(ctx, point, index) {
@@ -95,10 +113,10 @@
             } while ((element = element.offsetParent));
         }
 
-         return {x: (e.pageX - offsetX) / 4, y: (e.pageY - offsetY) / 4};
+         return new Point((e.pageX - offsetX) / 4, (e.pageY - offsetY) / 4);
     }
 
-    const center = {x: 50, y: 50};
+    const center = new Point(50, 50);
 
     function draw() {
 

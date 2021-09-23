@@ -37,6 +37,12 @@
             return Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2);
         }
 
+        insideRect(point1, point2) {
+            const tl = new Point(Math.min(point1.x, point2.x), Math.min(point1.y, point2.y));
+            const br = new Point(Math.max(point1.x, point2.x), Math.max(point1.y, point2.y));
+            return tl.x <= this.x && tl.y <= this.y && br.x >= this.x && br.y >= this.y;
+        }
+
     }
 
     class Frame {
@@ -70,6 +76,7 @@
     ctx.fillStyle = "gray";
 
     const ledPositions = {};
+    let mouseStart = null, mouseEnd = null;
     let currentFrame = new Frame();
 
     function radToDeg(a) {
@@ -163,22 +170,68 @@
             drawLED(ctx, point2, indexOrder.shift());
         }
 
+        // Draw the selection box if it is defined
+        if (mouseStart && mouseEnd) {
+            ctx.beginPath();
+            ctx.setLineDash([1,1]);
+            const size = mouseEnd.sub(mouseStart);
+            ctx.rect(mouseStart.x, mouseStart.y, size.x, size.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
     }
 
     // Fixes a problem where double clicking causes text to get selected on the canvas
     canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
 
+    canvas.addEventListener('mousedown', function(e) {
+
+        // Keep track of the initial mouse position
+        mouseStart = getMouse(e);
+
+    }, true);
+
+    canvas.addEventListener('mousemove', function(e) {
+
+        // Do nothing if there isn't an initial mouse position
+        if (mouseStart){
+
+            // Keep track of the mouse position
+            mouseEnd = getMouse(e);
+
+            // Redraw the canvas
+            draw();
+
+        }
+
+    }, true);
+
     canvas.addEventListener('mouseup', function(e) {
 
-        // Get mouse position
-        let mouse = getMouse(e);
+        // Check if there was any mouse movement
+        if (!mouseEnd) {
 
-        // Toggle all LEDs within range of the mouse
-        for (const [index, point] of Object.entries(ledPositions)) {
-            if (Math.pow(point.x - mouse.x, 2) + Math.pow(point.y - mouse.y, 2) < 16) {
-                currentFrame.toggle(index);
+            // Toggle all LEDs within range of the mouse
+            for (const [index, point] of Object.entries(ledPositions)) {
+                if (point.distSquared(mouseStart) < 16) {
+                    currentFrame.toggle(index);
+                }
             }
+
+        } else {
+
+            // Toggle all LEDs within bounding box
+            for (const [index, point] of Object.entries(ledPositions)) {
+                if (point.insideRect(mouseStart, mouseEnd)) {
+                    currentFrame.toggle(index);
+                }
+            }
+
         }
+
+        // Reset the mouse tracking
+        mouseStart = mouseEnd = null;
 
         // Redraw the canvas
         draw();

@@ -16,11 +16,26 @@
             margin: 16px auto;
             border: solid 1px lightgray;
         }
+
+        #frame-controls {
+            text-align: center;
+            margin: 16px auto;
+        }
     </style>
 </head>
 <body>
 
 <canvas id="canvas"></canvas>
+
+<div id="frame-controls">
+    <div class="d-inline-block" style="width: 200px;">
+        <div class="input-group">
+            <label class="input-group-text" for="duration">Duration</label>
+            <input type="text" class="form-control" id="duration" style="text-align: right;">
+            <span class="input-group-text">ms</span>
+        </div>
+    </div>
+</div>
 
 <nav id="frame-nav">
     <ul class="pagination justify-content-center">
@@ -257,7 +272,28 @@
     function goToFrame(frame) {
         currentFrame = frame;
         draw();
+        updateFrameControls();
         updateFrameNavigation();
+    }
+
+
+    // Get frame control elements
+    const durationField = document.querySelector("#frame-controls #duration");
+
+    // Duration control
+    durationField.addEventListener("change", e => {
+        const val = parseInt(e.target.value);
+        if (isNaN(val)) {
+            alert("Duration must be a numeric value!");
+            durationField.value = currentFrame.duration;
+        } else {
+            currentFrame.duration = parseInt(e.target.value);
+        }
+    });
+
+    // Update the frame controls UI
+    function updateFrameControls() {
+        durationField.value = currentFrame.duration;
     }
 
     // Get the frame navigation elements
@@ -317,8 +353,8 @@
 
     }
 
-    draw();
-    updateFrameNavigation();
+    // Initialize the UI
+    goToFrame(currentFrame);
 
 </script>
 

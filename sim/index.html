@@ -24,8 +24,8 @@
 
 <nav id="frame-nav">
     <ul class="pagination justify-content-center">
-        <li class="page-item play"><button class="page-link bi bi-play" href="#"></button></li>
-        <li class="page-item add"><button class="page-link bi bi-plus" href="#"></button></li>
+        <li class="page-item play"><button class="page-link bi bi-play"></button></li>
+        <li class="page-item add"><button class="page-link bi bi-plus"></button></li>
     </ul>
 </nav>
 
@@ -65,6 +65,7 @@
             for (let i = 0; i < 54; i++) {
                 this._leds.push(false);
             }
+            this.duration = 200;
         }
 
         toggle(index) {
@@ -261,10 +262,31 @@
 
     // Get the frame navigation elements
     const frameNav = document.querySelector("#frame-nav ul");
-    const playButton = frameNav.querySelector(".play");
-    const addButton = frameNav.querySelector(".add");
+    const playButton = frameNav.querySelector(".play button");
+    const addButton = frameNav.querySelector(".add button");
 
-    addButton.querySelector("button").addEventListener("click", () => {
+    // Playback controls
+    let playbackTimeout = null;
+    playButton.addEventListener("click", () => {
+        // Check if playback is running
+        if (!playbackTimeout) {
+            const next = () => {
+                goToFrame(frames[(frames.indexOf(currentFrame) + 1) % frames.length]);
+                playbackTimeout = setTimeout(next, currentFrame.duration);
+            }
+            playbackTimeout = setTimeout(next, currentFrame.duration);
+            playButton.classList.remove("bi-play");
+            playButton.classList.add("bi-stop");
+        } else {
+            clearTimeout(playbackTimeout);
+            playbackTimeout = null;
+            playButton.classList.remove("bi-stop");
+            playButton.classList.add("bi-play");
+        }
+    });
+
+    // Add frame control
+    addButton.addEventListener("click", () => {
         const frame = new Frame();
         frames.splice(frames.indexOf(currentFrame) + 1, 0, frame);
         goToFrame(frame);
@@ -290,7 +312,7 @@
                 li.classList.add("active");
             }
             li.appendChild(button);
-            frameNav.insertBefore(li, addButton);
+            frameNav.insertBefore(li, addButton.parentNode);
         }
 
     }

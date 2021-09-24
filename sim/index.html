@@ -35,6 +35,13 @@
             <span class="input-group-text">ms</span>
         </div>
     </div>
+    <div class="d-inline-block">
+        <div class="input-group">
+            <span class="input-group-text">Move</span>
+            <button class="btn btn-outline-primary bi bi-caret-left" id="move-left"></button>
+            <button class="btn btn-outline-primary bi bi-caret-right" id="move-right"></button>
+        </div>
+    </div>
 </div>
 
 <nav id="frame-nav">
@@ -279,6 +286,8 @@
 
     // Get frame control elements
     const durationField = document.querySelector("#frame-controls #duration");
+    const moveLeftButton = document.querySelector("#frame-controls #move-left");
+    const moveRightButton = document.querySelector("#frame-controls #move-right");
 
     // Duration control
     durationField.addEventListener("change", e => {
@@ -289,6 +298,22 @@
         } else {
             currentFrame.duration = parseInt(e.target.value);
         }
+    });
+
+    // Move frame controls
+    moveLeftButton.addEventListener("click", () => {
+        const oldIndex = frames.indexOf(currentFrame);
+        const newIndex = Math.max(oldIndex - 1, 0);
+        frames.splice(oldIndex, 1);
+        frames.splice(newIndex, 0, currentFrame);
+        updateFrameNavigation();
+    });
+    moveRightButton.addEventListener("click", () => {
+        const oldIndex = frames.indexOf(currentFrame);
+        const newIndex = Math.min(oldIndex + 1, frames.length);
+        frames.splice(oldIndex, 1);
+        frames.splice(newIndex, 0, currentFrame);
+        updateFrameNavigation();
     });
 
     // Update the frame controls UI

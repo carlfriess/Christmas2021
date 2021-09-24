@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <title>Christmas Card 2021 Simulator</title>
 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+
     <style>
         #canvas {
             display: block;
-            margin: auto;
+            margin: 16px auto;
             border: solid 1px lightgray;
         }
     </style>
@@ -15,6 +21,13 @@
 <body>
 
 <canvas id="canvas"></canvas>
+
+<nav id="frame-nav">
+    <ul class="pagination justify-content-center">
+        <li class="page-item play"><button class="page-link bi bi-play" href="#"></button></li>
+        <li class="page-item add"><button class="page-link bi bi-plus" href="#"></button></li>
+    </ul>
+</nav>
 
 <script type="application/javascript">
 
@@ -78,6 +91,7 @@
     const ledPositions = {};
     let mouseStart = null, mouseEnd = null;
     let currentFrame = new Frame();
+    let frames = [currentFrame];
 
     function radToDeg(a) {
         return a / Math.PI * 180;
@@ -238,7 +252,51 @@
 
     }, true);
 
+    // Switch to the given frame and update UI
+    function goToFrame(frame) {
+        currentFrame = frame;
+        draw();
+        updateFrameNavigation();
+    }
+
+    // Get the frame navigation elements
+    const frameNav = document.querySelector("#frame-nav ul");
+    const playButton = frameNav.querySelector(".play");
+    const addButton = frameNav.querySelector(".add");
+
+    addButton.querySelector("button").addEventListener("click", () => {
+        const frame = new Frame();
+        frames.splice(frames.indexOf(currentFrame) + 1, 0, frame);
+        goToFrame(frame);
+    });
+
+    // Update the frame navigation UI
+    function updateFrameNavigation() {
+
+        // Clear all frame elements from the pagination controls
+        for (const element of frameNav.querySelectorAll(".frame")) {
+            element.remove();
+        }
+
+        // Create new frame elements
+        for (let i = 0; i < frames.length; i++) {
+            const button = document.createElement("button");
+            button.classList.add("page-link");
+            button.innerText = i + 1;
+            button.addEventListener("click", () => goToFrame(frames[i]));
+            const li = document.createElement("li");
+            li.classList.add("page-item", "frame");
+            if (frames[i] === currentFrame) {
+                li.classList.add("active");
+            }
+            li.appendChild(button);
+            frameNav.insertBefore(li, addButton);
+        }
+
+    }
+
     draw();
+    updateFrameNavigation();
 
 </script>
 

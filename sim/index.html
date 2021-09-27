@@ -44,6 +44,14 @@
     </div>
     <div class="d-inline-block mx-1">
         <div class="input-group">
+            <span class="input-group-text">All</span>
+            <button class="btn btn-outline-primary bi bi-circle" id="select-none"></button>
+            <button class="btn btn-outline-primary bi bi-circle-half" id="toggle-all"></button>
+            <button class="btn btn-outline-primary bi bi-circle-fill" id="select-all"></button>
+        </div>
+    </div>
+    <div class="d-inline-block mx-1">
+        <div class="input-group">
             <button class="btn btn-outline-primary bi bi-files" id="frame-copy"></button>
         </div>
     </div>
@@ -102,6 +110,18 @@
 
         toggle(index) {
             this._leds[index - 1] = !this._leds[index - 1]
+        }
+
+        toggleAll() {
+            this._leds = this._leds.map(l => !l);
+        }
+
+        clearAll() {
+            this._leds.fill(false);
+        }
+
+        setAll() {
+            this._leds.fill(true);
         }
 
         isOn(index) {
@@ -305,6 +325,9 @@
     const durationField = document.querySelector("#frame-controls #duration");
     const moveLeftButton = document.querySelector("#frame-controls #move-left");
     const moveRightButton = document.querySelector("#frame-controls #move-right");
+    const selectNoneButton = document.querySelector("#frame-controls #select-none");
+    const toggleAllButton = document.querySelector("#frame-controls #toggle-all");
+    const selectAllButton = document.querySelector("#frame-controls #select-all");
     const copyFrameButton = document.querySelector("#frame-controls #frame-copy");
     const deleteFrameButton = document.querySelector("#frame-controls #frame-delete");
 
@@ -333,6 +356,20 @@
         frames.splice(oldIndex, 1);
         frames.splice(newIndex, 0, currentFrame);
         updateFrameNavigation();
+    });
+
+    // Select all controls
+    selectNoneButton.addEventListener("click", () => {
+        currentFrame.clearAll();
+        draw();
+    });
+    toggleAllButton.addEventListener("click", () => {
+        currentFrame.toggleAll();
+        draw();
+    });
+    selectAllButton.addEventListener("click", () => {
+        currentFrame.setAll();
+        draw();
     });
 
     // Duplicate frame control

@@ -17,13 +17,29 @@
             border: solid 1px lightgray;
         }
 
-        #frame-controls {
+        #effect-controls, #frame-controls{
             text-align: center;
             margin: 16px auto;
         }
     </style>
 </head>
 <body>
+
+<div id="effect-controls">
+    <div class="d-inline-block mx-1">
+        <div class="input-group">
+            <span class="input-group-text">Import</span>
+            <label class="btn btn-outline-success" for="import-json">JSON</label>
+        </div>
+        <input type="file" class="d-none" id="import-json" accept="application/json" />
+    </div>
+    <div class="d-inline-block mx-1">
+        <div class="input-group">
+            <span class="input-group-text">Export</span>
+            <button class="btn btn-outline-success" id="export-json">JSON</button>
+        </div>
+    </div>
+</div>
 
 <canvas id="canvas"></canvas>
 
@@ -320,6 +336,30 @@
         updateFrameNavigation();
     }
 
+    // Effect controls
+    const importJsonInput = document.querySelector("#effect-controls #import-json");
+    const exportJsonButton = document.querySelector("#effect-controls #export-json");
+
+    // Import JSON control
+    importJsonInput.addEventListener("change", e => {
+        const file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+            const contents = JSON.parse(e.target.result);
+            contents.forEach(frame => frame.__proto__ = Frame.prototype);
+            frames = contents;
+            goToFrame(frames[0]);
+        };
+        reader.readAsText(file);
+    });
+
+    // Export JSON control
+    exportJsonButton.addEventListener("click", () => {
+        download("effect.json", JSON.stringify(frames));
+    });
 
     // Get frame control elements
     const durationField = document.querySelector("#frame-controls #duration");
@@ -447,6 +487,20 @@
             frameNav.insertBefore(li, addButton.parentNode);
         }
 
+    }
+
+    // Download helper function
+    function download(filename, text) {
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
     }
 
     // Initialize the UI

@@ -28,21 +28,26 @@
 <canvas id="canvas"></canvas>
 
 <div id="frame-controls">
-    <div class="d-inline-block" style="width: 200px;">
+    <div class="d-inline-block mx-1" style="width: 200px;">
         <div class="input-group">
             <label class="input-group-text" for="duration">Duration</label>
             <input type="text" class="form-control" id="duration" style="text-align: right;">
             <span class="input-group-text">ms</span>
         </div>
     </div>
-    <div class="d-inline-block">
+    <div class="d-inline-block mx-1">
         <div class="input-group">
             <span class="input-group-text">Move</span>
             <button class="btn btn-outline-primary bi bi-caret-left" id="move-left"></button>
             <button class="btn btn-outline-primary bi bi-caret-right" id="move-right"></button>
         </div>
     </div>
-    <div class="d-inline-block">
+    <div class="d-inline-block mx-1">
+        <div class="input-group">
+            <button class="btn btn-outline-primary bi bi-files" id="frame-copy"></button>
+        </div>
+    </div>
+    <div class="d-inline-block mx-1">
         <div class="input-group">
             <button class="btn btn-outline-danger bi bi-trash" id="frame-delete"></button>
         </div>
@@ -101,6 +106,13 @@
 
         isOn(index) {
             return this._leds[index - 1];
+        }
+
+        clone() {
+            const clone = new Frame();
+            clone._leds = [...this._leds];
+            clone.duration = this.duration;
+            return clone;
         }
 
     }
@@ -293,6 +305,7 @@
     const durationField = document.querySelector("#frame-controls #duration");
     const moveLeftButton = document.querySelector("#frame-controls #move-left");
     const moveRightButton = document.querySelector("#frame-controls #move-right");
+    const copyFrameButton = document.querySelector("#frame-controls #frame-copy");
     const deleteFrameButton = document.querySelector("#frame-controls #frame-delete");
 
     // Duration control
@@ -320,6 +333,13 @@
         frames.splice(oldIndex, 1);
         frames.splice(newIndex, 0, currentFrame);
         updateFrameNavigation();
+    });
+
+    // Duplicate frame control
+    copyFrameButton.addEventListener("click", () => {
+        const frame = currentFrame.clone();
+        frames.splice(frames.indexOf(currentFrame) + 1, 0, frame);
+        goToFrame(frame);
     });
 
     // Delete frame control

@@ -43,6 +43,7 @@
         <div class="input-group">
             <span class="input-group-text">Export</span>
             <button class="btn btn-outline-success" id="export-json">JSON</button>
+            <button class="btn btn-outline-success" id="export-c">C</button>
         </div>
     </div>
 </div>
@@ -346,6 +347,7 @@
     const nameField = document.querySelector("#effect-controls #name");
     const importJsonInput = document.querySelector("#effect-controls #import-json");
     const exportJsonButton = document.querySelector("#effect-controls #export-json");
+    const exportCButton = document.querySelector("#effect-controls #export-c");
 
     // Import JSON control
     importJsonInput.addEventListener("change", e => {
@@ -367,6 +369,11 @@
     // Export JSON control
     exportJsonButton.addEventListener("click", () => {
         download(`${ nameField.value }.json`, exportJSON());
+    });
+
+    // Export C control
+    exportCButton.addEventListener("click", () => {
+        download(`${ nameField.value }.c`, codegen());
     });
 
     // Get frame control elements
@@ -517,6 +524,49 @@
             name: nameField.value,
             frames: frames,
         });
+    }
+
+    // Code generation for export as C code
+    function codegen() {
+
+        let code = `/*** AUTO-GENERATED EFFECT FILE ***\n\n`;
+        code += exportJSON() + "\n\n";
+        code += `*/\n\n`;
+        code += `#include <effect.h>\n\n`;
+
+        // Write out durations of frames
+        code += `static const uint16_t iterations[] = { ${ frames.map(f => f.duration).join(", ") } };\n`;
+
+        function frameToBitmap(frame) {
+            const bytes = [];
+            for (let i = 1; i <= 54;) {
+                let byte = 0;
+                for (let j = 0; j < 8 && i <= 54; j++, i++) {
+                    if (frame.isOn(i)) {
+                        byte |= 1 << j;
+                    }
+                }
+                bytes.push(byte);
+            }
+            return bytes;
+        }
+
+        function toHex(val) {
+            return "0x" + ("0" + val.toString(16)).substr(-2);
+        }
+
+        // Write out bitmap
+        code += `static const uint8_t bitmap[] = { ${ frames.map(frameToBitmap).flat().map(toHex).join(", ") } };\n\n`;
+
+        // Write out effect definition
+        code += `const struct effect ${ nameField.value } = {\n`;
+        code += `    .bitmaps = bitmap,\n`;
+        code += `    .iterations = iterations,\n`;
+        code += `    .num_frames = ${ frames.length },\n`;
+        code += `};\n`;
+
+        return code;
+
     }
 
     // Initialize the UI

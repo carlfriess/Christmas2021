@@ -13,3 +13,5 @@ Assembly\ Exports/
 # IntelliJ
 .idea/
 *.iml
+
+\.DS_Store

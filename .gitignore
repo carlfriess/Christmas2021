@@ -1,0 +1,9 @@
+# Code Composer Studio
+targetConfigs/
+\.settings/
+
+# Build files
+Debug/
+Release/
+
+\.DS_Store

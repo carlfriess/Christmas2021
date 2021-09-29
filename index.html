@@ -368,11 +368,19 @@
 
     // Export JSON control
     exportJsonButton.addEventListener("click", () => {
+        if (!nameField.value) {
+            alert("Effect name is required for export!");
+            return;
+        }
         download(`${ nameField.value }.json`, exportJSON());
     });
 
     // Export C control
     exportCButton.addEventListener("click", () => {
+        if (!nameField.value) {
+            alert("Effect name is required for export!");
+            return;
+        }
         download(`${ nameField.value }.c`, codegen());
     });
 

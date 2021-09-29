@@ -24,6 +24,8 @@ const struct effect blink = {
 int main(void)
 {
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
+    PM5CTL0 &= ~LOCKLPM5;       // Disable the GPIO power-on default high-impedance mode
+                                // to activate previously configured port settings
 	
 	for (;;) {
 	    play_effect(&blink);

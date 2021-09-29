@@ -26,6 +26,12 @@
 <body>
 
 <div id="effect-controls">
+    <div class="d-inline-block mx-1" style="width: 180px;">
+        <div class="input-group">
+            <label class="input-group-text" for="name">Name:</label>
+            <input type="text" class="form-control" id="name" style="font-family: monospace;">
+        </div>
+    </div>
     <div class="d-inline-block mx-1">
         <div class="input-group">
             <span class="input-group-text">Import</span>
@@ -337,6 +343,7 @@
     }
 
     // Effect controls
+    const nameField = document.querySelector("#effect-controls #name");
     const importJsonInput = document.querySelector("#effect-controls #import-json");
     const exportJsonButton = document.querySelector("#effect-controls #export-json");
 
@@ -349,8 +356,9 @@
         const reader = new FileReader();
         reader.onload = e => {
             const contents = JSON.parse(e.target.result);
-            contents.forEach(frame => frame.__proto__ = Frame.prototype);
-            frames = contents;
+            nameField.value = contents.name;
+            contents.frames.forEach(frame => frame.__proto__ = Frame.prototype);
+            frames = contents.frames;
             goToFrame(frames[0]);
         };
         reader.readAsText(file);
@@ -358,7 +366,7 @@
 
     // Export JSON control
     exportJsonButton.addEventListener("click", () => {
-        download("effect.json", JSON.stringify(frames));
+        download(`${ nameField.value }.json`, exportJSON());
     });
 
     // Get frame control elements
@@ -501,6 +509,14 @@
         element.click();
 
         document.body.removeChild(element);
+    }
+
+    // Export current effect as JSON
+    function exportJSON() {
+        return JSON.stringify({
+            name: nameField.value,
+            frames: frames,
+        });
     }
 
     // Initialize the UI

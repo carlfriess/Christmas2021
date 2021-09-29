@@ -534,8 +534,13 @@
         code += `*/\n\n`;
         code += `#include <effect.h>\n\n`;
 
+        // Empirical measurement: 10000 iterations = 19750ms
+        function msToIters(ms) {
+            return Math.round(ms * (10000/19750));
+        }
+
         // Write out durations of frames
-        code += `static const uint16_t iterations[] = { ${ frames.map(f => f.duration).join(", ") } };\n`;
+        code += `static const uint16_t iterations[] = { ${ frames.map(f => msToIters(f.duration)).join(", ") } };\n`;
 
         function frameToBitmap(frame) {
             const bytes = [];

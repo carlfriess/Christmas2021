@@ -6,20 +6,11 @@
 
 #define DELAY   10
 
+
 static void play_effect(const struct effect *effect);
 static void charlieplex(const uint8_t *bitmap);
 
-const uint16_t iterations[] = { 128, 128 };
-const uint8_t bitmap[] = {
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-};
-
-const struct effect blink = {
-    .bitmaps = bitmap,
-    .iterations = iterations,
-    .num_frames = 2,
-};
+extern const struct effect bubble;
 
 int main(void)
 {
@@ -28,7 +19,7 @@ int main(void)
                                 // to activate previously configured port settings
 	
 	for (;;) {
-	    play_effect(&blink);
+	    play_effect(&bubble);
 	}
 
 	return 0;

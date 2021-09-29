@@ -1,6 +1,7 @@
 # Code Composer Studio
 targetConfigs/
 \.settings/
+\.launches/
 
 # Build files
 Debug/

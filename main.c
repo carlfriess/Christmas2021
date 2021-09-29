@@ -154,6 +154,10 @@ static void charlieplex(const uint8_t *bitmap) {
 
     __delay_cycles(DELAY);
 
+    P1DIR = 0x00;
+    P1OUT = 0x00;
+    P2DIR = 0x00;
+    P2OUT = 0x00;
     // D8
     if (bitmap[0] & 0x80) {
         P1DIR = 0x03;
@@ -259,6 +263,10 @@ static void charlieplex(const uint8_t *bitmap) {
 
     __delay_cycles(DELAY);
 
+    P1DIR = 0x00;
+    P1OUT = 0x00;
+    P2DIR = 0x00;
+    P2OUT = 0x00;
     // D15
     if (bitmap[1] & 0x40) {
         P1DIR = 0x05;
@@ -364,6 +372,10 @@ static void charlieplex(const uint8_t *bitmap) {
 
     __delay_cycles(DELAY);
 
+    P1DIR = 0x00;
+    P1OUT = 0x00;
+    P2DIR = 0x00;
+    P2OUT = 0x00;
     // D22
     if (bitmap[2] & 0x20) {
         P1DIR = 0x09;
@@ -469,6 +481,10 @@ static void charlieplex(const uint8_t *bitmap) {
 
     __delay_cycles(DELAY);
 
+    P1DIR = 0x00;
+    P1OUT = 0x00;
+    P2DIR = 0x00;
+    P2OUT = 0x00;
     // D29
     if (bitmap[3] & 0x10) {
         P1DIR = 0x41;
@@ -574,6 +590,10 @@ static void charlieplex(const uint8_t *bitmap) {
 
     __delay_cycles(DELAY);
 
+    P1DIR = 0x00;
+    P1OUT = 0x00;
+    P2DIR = 0x00;
+    P2OUT = 0x00;
     // D36
     if (bitmap[4] & 0x08) {
         P1DIR = 0x81;
@@ -679,6 +699,10 @@ static void charlieplex(const uint8_t *bitmap) {
 
     __delay_cycles(DELAY);
 
+    P1DIR = 0x00;
+    P1OUT = 0x00;
+    P2DIR = 0x00;
+    P2OUT = 0x00;
     // D43
     if (bitmap[5] & 0x04) {
         P1DIR = 0x01;
@@ -784,6 +808,10 @@ static void charlieplex(const uint8_t *bitmap) {
 
     __delay_cycles(DELAY);
 
+    P1DIR = 0x00;
+    P1OUT = 0x00;
+    P2DIR = 0x00;
+    P2OUT = 0x00;
     // D50
     if (bitmap[6] & 0x02) {
         P1DIR = 0x01;
@@ -858,5 +886,10 @@ static void charlieplex(const uint8_t *bitmap) {
     }
 
     __delay_cycles(DELAY);
+
+    P1DIR = 0x00;
+    P1OUT = 0x00;
+    P2DIR = 0x00;
+    P2OUT = 0x00;
 
 }

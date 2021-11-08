@@ -487,6 +487,14 @@
         goToFrame(frame);
     });
 
+    // Keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+            goToFrame(frames[(frames.indexOf(currentFrame) + 1) % frames.length]);
+            e.preventDefault();
+        }
+    });
+
     // Update the frame navigation UI
     function updateFrameNavigation() {
 

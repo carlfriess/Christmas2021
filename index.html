@@ -280,16 +280,16 @@
     }
 
     // Fixes a problem where double clicking causes text to get selected on the canvas
-    canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
+    canvas.addEventListener("selectstart", function(e) { e.preventDefault(); return false; }, false);
 
-    canvas.addEventListener('mousedown', function(e) {
+    canvas.addEventListener("mousedown", function(e) {
 
         // Keep track of the initial mouse position
         mouseStart = getMouse(e);
 
     }, true);
 
-    canvas.addEventListener('mousemove', function(e) {
+    canvas.addEventListener("mousemove", function(e) {
 
         // Do nothing if there isn't an initial mouse position
         if (mouseStart){
@@ -304,7 +304,7 @@
 
     }, true);
 
-    canvas.addEventListener('mouseup', function(e) {
+    canvas.addEventListener("mouseup", function(e) {
 
         // Check if there was any mouse movement
         if (!mouseEnd) {
@@ -514,11 +514,11 @@
 
     // Download helper function
     function download(filename, text) {
-        const element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', filename);
+        const element = document.createElement("a");
+        element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
+        element.setAttribute("download", filename);
 
-        element.style.display = 'none';
+        element.style.display = "none";
         document.body.appendChild(element);
 
         element.click();

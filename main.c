@@ -10,7 +10,12 @@
 static void play_effect(const struct effect *effect);
 static void charlieplex(const uint8_t *bitmap);
 
+extern const struct effect one_by_one;
+
 extern const struct effect bubble;
+extern const struct effect sequence;
+extern const struct effect spin;
+extern const struct effect twinkle;
 
 int main(void)
 {
@@ -19,7 +24,11 @@ int main(void)
                                 // to activate previously configured port settings
 	
 	for (;;) {
-	    play_effect(&bubble);
+	    int i;
+        for (i = 0; i < 5; ++i) play_effect(&bubble);
+        for (i = 0; i < 5; ++i) play_effect(&sequence);
+        for (i = 0; i < 5; ++i) play_effect(&spin);
+        for (i = 0; i < 5; ++i) play_effect(&twinkle);
 	}
 
 	return 0;

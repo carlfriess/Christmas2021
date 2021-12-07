@@ -1,14 +1,59 @@
-#include <effect.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <msp430.h> 
+/* --COPYRIGHT--,BSD
+ * Copyright (c) 2017, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * --/COPYRIGHT--*/
+//*****************************************************************************
+// Development main.c for MSP430FR2522 and MSP430FR2512 CapTIvate devices.
+//
+// This starter application initializes the CapTIvate touch library
+// for the touch panel specified by CAPT_UserConfig.c/.h via a call to
+// CAPT_appStart(), which initializes and calibrates all sensors in the
+// application, and starts the CapTIvate interval timer.
+//
+// Then, the capacitive touch interface is driven by calling the CapTIvate
+// application handler, CAPT_appHandler().  The application handler manages
+// whether the user interface (UI) is running in full active scan mode, or
+// in a low-power wake-on-proximity mode.
+//
+// \version 1.83.00.05
+// Released on May 15, 2020
+//
+//*****************************************************************************
 
+#include <msp430.h>                      // Generic MSP430 Device Include
+#include "driverlib.h"                   // MSPWare Driver Library
+#include "captivate.h"                   // CapTIvate Touch Software Library
+#include "CAPT_App.h"                    // CapTIvate Application Code
+#include "CAPT_BSP.h"                    // CapTIvate EVM Board Support Package
 
-#define DELAY   10
-
-
-static void play_effect(const struct effect *effect);
-static void charlieplex(const uint8_t *bitmap);
+#include <charlieplex.h>
 
 extern const struct effect one_by_one;
 
@@ -17,879 +62,55 @@ extern const struct effect sequence;
 extern const struct effect spin;
 extern const struct effect twinkle;
 
-int main(void)
+void mainButtonHandler(tSensor* pSensor)
 {
-	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
-    PM5CTL0 &= ~LOCKLPM5;       // Disable the GPIO power-on default high-impedance mode
-                                // to activate previously configured port settings
-	
-	for (;;) {
-	    int i;
-        for (i = 0; i < 5; ++i) play_effect(&bubble);
-        for (i = 0; i < 5; ++i) play_effect(&sequence);
-        for (i = 0; i < 5; ++i) play_effect(&spin);
-        for (i = 0; i < 5; ++i) play_effect(&twinkle);
-	}
-
-	return 0;
+    if (pSensor->bSensorTouch) {
+        play_effect(&bubble);
+    }
 }
 
-static void play_effect(const struct effect *effect) {
-
-    size_t frame;
-    uint16_t i;
-
-    for (frame = 0; frame < effect->num_frames; frame++) {
-        for (i = effect->iterations[frame]; i > 0; i--) {
-            charlieplex(effect->bitmaps + frame * 7);
-        }
-    }
-
-}
-
-static void charlieplex(const uint8_t *bitmap) {
-
-    // D1
-    if (bitmap[0] & 0x01) {
-        P1DIR = 0x03;
-        P1OUT = 0x02;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D2
-    if (bitmap[0] & 0x02) {
-        P1DIR = 0x05;
-        P1OUT = 0x04;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D3
-    if (bitmap[0] & 0x04) {
-        P1DIR = 0x09;
-        P1OUT = 0x08;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D4
-    if (bitmap[0] & 0x08) {
-        P1DIR = 0x41;
-        P1OUT = 0x40;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D5
-    if (bitmap[0] & 0x10) {
-        P1DIR = 0x81;
-        P1OUT = 0x80;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D6
-    if (bitmap[0] & 0x20) {
-        P1DIR = 0x01;
-        P1OUT = 0x00;
-        P2DIR = 0x01;
-        P2OUT = 0x01;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D7
-    if (bitmap[0] & 0x40) {
-        P1DIR = 0x01;
-        P1OUT = 0x00;
-        P2DIR = 0x02;
-        P2OUT = 0x02;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    P1DIR = 0x00;
-    P1OUT = 0x00;
-    P2DIR = 0x00;
-    P2OUT = 0x00;
-    // D8
-    if (bitmap[0] & 0x80) {
-        P1DIR = 0x03;
-        P1OUT = 0x01;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D9
-    if (bitmap[1] & 0x01) {
-        P1DIR = 0x06;
-        P1OUT = 0x04;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D10
-    if (bitmap[1] & 0x02) {
-        P1DIR = 0x0a;
-        P1OUT = 0x08;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D11
-    if (bitmap[1] & 0x04) {
-        P1DIR = 0x42;
-        P1OUT = 0x40;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D12
-    if (bitmap[1] & 0x08) {
-        P1DIR = 0x82;
-        P1OUT = 0x80;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D13
-    if (bitmap[1] & 0x10) {
-        P1DIR = 0x02;
-        P1OUT = 0x00;
-        P2DIR = 0x01;
-        P2OUT = 0x01;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D14
-    if (bitmap[1] & 0x20) {
-        P1DIR = 0x02;
-        P1OUT = 0x00;
-        P2DIR = 0x02;
-        P2OUT = 0x02;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    P1DIR = 0x00;
-    P1OUT = 0x00;
-    P2DIR = 0x00;
-    P2OUT = 0x00;
-    // D15
-    if (bitmap[1] & 0x40) {
-        P1DIR = 0x05;
-        P1OUT = 0x01;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D16
-    if (bitmap[1] & 0x80) {
-        P1DIR = 0x06;
-        P1OUT = 0x02;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D17
-    if (bitmap[2] & 0x01) {
-        P1DIR = 0x0c;
-        P1OUT = 0x08;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D18
-    if (bitmap[2] & 0x02) {
-        P1DIR = 0x44;
-        P1OUT = 0x40;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D19
-    if (bitmap[2] & 0x04) {
-        P1DIR = 0x84;
-        P1OUT = 0x80;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D20
-    if (bitmap[2] & 0x08) {
-        P1DIR = 0x04;
-        P1OUT = 0x00;
-        P2DIR = 0x01;
-        P2OUT = 0x01;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D21
-    if (bitmap[2] & 0x10) {
-        P1DIR = 0x04;
-        P1OUT = 0x00;
-        P2DIR = 0x02;
-        P2OUT = 0x02;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    P1DIR = 0x00;
-    P1OUT = 0x00;
-    P2DIR = 0x00;
-    P2OUT = 0x00;
-    // D22
-    if (bitmap[2] & 0x20) {
-        P1DIR = 0x09;
-        P1OUT = 0x01;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D23
-    if (bitmap[2] & 0x40) {
-        P1DIR = 0x0a;
-        P1OUT = 0x02;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D24
-    if (bitmap[2] & 0x80) {
-        P1DIR = 0x0c;
-        P1OUT = 0x04;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D25
-    if (bitmap[3] & 0x01) {
-        P1DIR = 0x48;
-        P1OUT = 0x40;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D26
-    if (bitmap[3] & 0x02) {
-        P1DIR = 0x88;
-        P1OUT = 0x80;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D27
-    if (bitmap[3] & 0x04) {
-        P1DIR = 0x08;
-        P1OUT = 0x00;
-        P2DIR = 0x01;
-        P2OUT = 0x01;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D28
-    if (bitmap[3] & 0x08) {
-        P1DIR = 0x08;
-        P1OUT = 0x00;
-        P2DIR = 0x02;
-        P2OUT = 0x02;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    P1DIR = 0x00;
-    P1OUT = 0x00;
-    P2DIR = 0x00;
-    P2OUT = 0x00;
-    // D29
-    if (bitmap[3] & 0x10) {
-        P1DIR = 0x41;
-        P1OUT = 0x01;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D30
-    if (bitmap[3] & 0x20) {
-        P1DIR = 0x42;
-        P1OUT = 0x02;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D31
-    if (bitmap[3] & 0x40) {
-        P1DIR = 0x44;
-        P1OUT = 0x04;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D32
-    if (bitmap[3] & 0x80) {
-        P1DIR = 0x48;
-        P1OUT = 0x08;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D33
-    if (bitmap[4] & 0x01) {
-        P1DIR = 0xc0;
-        P1OUT = 0x80;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D34
-    if (bitmap[4] & 0x02) {
-        P1DIR = 0x40;
-        P1OUT = 0x00;
-        P2DIR = 0x01;
-        P2OUT = 0x01;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D35
-    if (bitmap[4] & 0x04) {
-        P1DIR = 0x40;
-        P1OUT = 0x00;
-        P2DIR = 0x02;
-        P2OUT = 0x02;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    P1DIR = 0x00;
-    P1OUT = 0x00;
-    P2DIR = 0x00;
-    P2OUT = 0x00;
-    // D36
-    if (bitmap[4] & 0x08) {
-        P1DIR = 0x81;
-        P1OUT = 0x01;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D37
-    if (bitmap[4] & 0x10) {
-        P1DIR = 0x82;
-        P1OUT = 0x02;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D38
-    if (bitmap[4] & 0x20) {
-        P1DIR = 0x84;
-        P1OUT = 0x04;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D39
-    if (bitmap[4] & 0x40) {
-        P1DIR = 0x88;
-        P1OUT = 0x08;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D40
-    if (bitmap[4] & 0x80) {
-        P1DIR = 0xc0;
-        P1OUT = 0x40;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D41
-    if (bitmap[5] & 0x01) {
-        P1DIR = 0x80;
-        P1OUT = 0x00;
-        P2DIR = 0x01;
-        P2OUT = 0x01;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D42
-    if (bitmap[5] & 0x02) {
-        P1DIR = 0x80;
-        P1OUT = 0x00;
-        P2DIR = 0x02;
-        P2OUT = 0x02;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    P1DIR = 0x00;
-    P1OUT = 0x00;
-    P2DIR = 0x00;
-    P2OUT = 0x00;
-    // D43
-    if (bitmap[5] & 0x04) {
-        P1DIR = 0x01;
-        P1OUT = 0x01;
-        P2DIR = 0x01;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D44
-    if (bitmap[5] & 0x08) {
-        P1DIR = 0x02;
-        P1OUT = 0x02;
-        P2DIR = 0x01;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D45
-    if (bitmap[5] & 0x10) {
-        P1DIR = 0x04;
-        P1OUT = 0x04;
-        P2DIR = 0x01;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D46
-    if (bitmap[5] & 0x20) {
-        P1DIR = 0x08;
-        P1OUT = 0x08;
-        P2DIR = 0x01;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D47
-    if (bitmap[5] & 0x40) {
-        P1DIR = 0x40;
-        P1OUT = 0x40;
-        P2DIR = 0x01;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D48
-    if (bitmap[5] & 0x80) {
-        P1DIR = 0x80;
-        P1OUT = 0x80;
-        P2DIR = 0x01;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D49
-    if (bitmap[6] & 0x01) {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x03;
-        P2OUT = 0x02;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    P1DIR = 0x00;
-    P1OUT = 0x00;
-    P2DIR = 0x00;
-    P2OUT = 0x00;
-    // D50
-    if (bitmap[6] & 0x02) {
-        P1DIR = 0x01;
-        P1OUT = 0x01;
-        P2DIR = 0x02;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D51
-    if (bitmap[6] & 0x04) {
-        P1DIR = 0x02;
-        P1OUT = 0x02;
-        P2DIR = 0x02;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D52
-    if (bitmap[6] & 0x08) {
-        P1DIR = 0x04;
-        P1OUT = 0x04;
-        P2DIR = 0x02;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D53
-    if (bitmap[6] & 0x10) {
-        P1DIR = 0x08;
-        P1OUT = 0x08;
-        P2DIR = 0x02;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    // D54
-    if (bitmap[6] & 0x20) {
-        P1DIR = 0x40;
-        P1OUT = 0x40;
-        P2DIR = 0x02;
-        P2OUT = 0x00;
-    } else {
-        P1DIR = 0x00;
-        P1OUT = 0x00;
-        P2DIR = 0x00;
-        P2OUT = 0x00;
-    }
-
-    __delay_cycles(DELAY);
-
-    P1DIR = 0x00;
-    P1OUT = 0x00;
-    P2DIR = 0x00;
-    P2OUT = 0x00;
-
-}
+void main(void)
+{
+	//
+	// Initialize the MCU
+	// BSP_configureMCU() sets up the device IO and clocking
+	// The global interrupt enable is set to allow peripherals
+	// to wake the MCU.
+	//
+	WDTCTL = WDTPW | WDTHOLD;
+	BSP_configureMCU();
+	__bis_SR_register(GIE);
+
+    MAP_CAPT_registerCallback(
+        &mainButton,
+        &mainButtonHandler
+    );
+
+	//
+	// Start the CapTIvate application
+	//
+	CAPT_appStart();
+
+	//
+	// Background Loop
+	//
+	while(1)
+	{
+		//
+		// Run the captivate application handler.
+		//
+		CAPT_appHandler();
+		//
+		// This is a great place to add in any 
+		// background application code.
+		//
+		__no_operation();
+
+		//
+		// End of background loop iteration
+		// Go to sleep if there is nothing left to do
+		//
+		CAPT_appSleep();
+		
+	} // End background loop
+} // End main()

@@ -13,10 +13,19 @@ extern const struct effect sequence;
 extern const struct effect spin;
 extern const struct effect twinkle;
 
+const struct effect *effects[] = {&bubble, &sequence, &spin, &twinkle};
+
 void mainButtonHandler(tSensor* pSensor)
 {
+    // Check if the main button is being touched
     if (pSensor->bSensorTouch) {
-        play_effect(&bubble);
+
+        // Choose an effect at random
+        const struct effect *effect = effects[rand() & 3];
+
+        // Play back the effect eight times
+        int i;
+        for (i = 0; i < 8; ++i) play_effect(effect);
     }
 }
 

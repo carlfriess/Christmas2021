@@ -39,6 +39,8 @@ void main(void)
 	BSP_configureMCU();
 	__bis_SR_register(GIE);
 
+	srand(2);
+
 	// Register the callback for the main button
     MAP_CAPT_registerCallback(
         &mainButton,

@@ -56,6 +56,7 @@
 #include <stdint.h>
 
 #include "CAPT_BSP.h"
+#include "CAPT_UserConfig.h"
 
 //*****************************************************************************
 //
@@ -98,7 +99,7 @@ void BSP_configureMCU(void)
     P1SEL1 = (0);
 #else
     P1OUT  = (0);
-    //P1DIR  = (GPIO_PIN0 | GPIO_PIN1 | GPIO_PIN2 | GPIO_PIN3 | GPIO_PIN4 | GPIO_PIN5 | GPIO_PIN6 | GPIO_PIN7);
+    P1DIR  = (GPIO_PIN0 | GPIO_PIN1 | GPIO_PIN2 | GPIO_PIN3 | GPIO_PIN4 | GPIO_PIN5 | GPIO_PIN6 | GPIO_PIN7);
     P1SEL0 = (0);
     P1SEL1 = (0);
 #endif
@@ -117,9 +118,18 @@ void BSP_configureMCU(void)
     P2SEL1 =  (GPIO_PIN0 | GPIO_PIN1 | GPIO_PIN5 | GPIO_PIN6);
 #else
     P2OUT  =  (0);
-    //P2DIR  =  (GPIO_PIN2 | GPIO_PIN3 | GPIO_PIN4);
-    //P2SEL0 =  (GPIO_PIN0 | GPIO_PIN1);
-    //P2SEL1 =  (GPIO_PIN5 | GPIO_PIN6);
+    // P2.0 and P2.1 are used for UART when connecting the target to
+    // CapTIvate Design Center. However, in production, these pins are
+    // used for the LED matrix.
+#if (CAPT_INTERFACE == __CAPT_NO_INTERFACE__)
+    P1DIR  = (GPIO_PIN0 | GPIO_PIN1 | GPIO_PIN2 | GPIO_PIN3 | GPIO_PIN4 | GPIO_PIN5 | GPIO_PIN6 | GPIO_PIN7);
+    P1SEL0 = (0);
+    P1SEL1 = (0);
+#else
+    P2DIR  =  (GPIO_PIN2 | GPIO_PIN3 | GPIO_PIN4);
+    P2SEL0 =  (GPIO_PIN0 | GPIO_PIN1);
+    P2SEL1 =  (GPIO_PIN5 | GPIO_PIN6);
+#endif
 #endif
 
     //

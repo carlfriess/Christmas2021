@@ -861,9 +861,10 @@ void charlieplex(const uint8_t *bitmap) {
 
     __delay_cycles(DELAY);
 
-    P1DIR = 0x00;
+    // Revert to low-power pin configuration
+    P1DIR = 0xFF;
     P1OUT = 0x00;
-    P2DIR = 0x00;
+    P2DIR = 0xFF;
     P2OUT = 0x00;
 
 }

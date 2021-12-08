@@ -9,11 +9,11 @@
 extern const struct effect one_by_one;
 
 extern const struct effect bubble;
-extern const struct effect sequence;
 extern const struct effect spin;
 extern const struct effect twinkle;
+extern const struct effect spiral;
 
-const struct effect *effects[] = {&bubble, &sequence, &spin, &twinkle};
+const struct effect *effects[] = {&bubble, &spin, &twinkle, &spiral};
 
 void mainButtonHandler(tSensor* pSensor)
 {

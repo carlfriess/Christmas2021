@@ -14,4 +14,5 @@
 	<filesToOpen value="main.c"/>
 	<templateProperties value="id=christmas2021.projectspec.christmas2021"/>
 	<origin value="/Users/carl/CapTIvateDesignCenter_1_83_00_08/CapTIvateDesignCenterWorkspace/christmas2021/src/CCS/christmas2021.projectspec"/>
+	<isTargetManual value="false"/>
 </projectOptions>

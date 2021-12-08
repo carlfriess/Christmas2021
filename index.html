@@ -550,9 +550,9 @@
         code += `*/\n\n`;
         code += `#include <effect.h>\n\n`;
 
-        // Empirical measurement: 10000 iterations = 19750ms
+        // Empirical measurement: 10000 iterations = 6389ms
         function msToIters(ms) {
-            return Math.round(ms * (10000/19750));
+            return Math.round(ms * (10000/6389));
         }
 
         // Write out durations of frames
